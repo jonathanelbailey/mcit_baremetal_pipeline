@@ -1,6 +1,11 @@
+- name: check if swap is enabled
+  command: swapon -s
+  register: swap
+
 - name: disable swap
   command: swapoff -a
   become: yes
+  when: swap is defined
 
 - name: remove swap partition from fstab
   lineinfile:
@@ -28,6 +33,7 @@
     - 'options kvm-intel enable_shadow_vmcs=1'
     - 'options kvm-intel enable_apicv=1'
     - 'options kvm-intel ept=1'
+  register: created_nested_conf
   become: yes
   when: nested_status == "N"
 
@@ -36,8 +42,9 @@
   with_items:
     - modprobe -r kvm_intel
     - modprobe -a kvm_intel
+  register: enable_nested
   become: yes
-  when: nested_status == "N"
+  when: create_nested_conf.changed
 
 - name: set selinux to permissive
   selinux:
@@ -50,18 +57,23 @@
     name: firewalld
     state: stopped
     enabled: no
+  become: yes
 
 - name: reboot after configuration changes
   command: shutdown -r +1
   async: 0
   poll: 0
   become: yes
+  register: reboot
+  when: enable_nested.changed
 
 - name: wait for server after kernel config reboot
   wait_for:
     host: "{{ ansible_ssh_host }}"
     port: 22
+    search_regex: OpenSSH
     state: started
     timeout: 600
-    delay: 300
+    delay: 360
   delegate_to: localhost
+  when: reboot.changed

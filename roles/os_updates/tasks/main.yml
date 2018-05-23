@@ -9,6 +9,7 @@
     name: "*"
     state: latest
   become: yes
+  register: update
 
 - name: install dependencies
   yum:
@@ -24,12 +25,17 @@
   async: 0
   poll: 0
   become: yes
+  register: reboot
+  when: update.changed
+
 
 - name: wait for server after updates reboot
   wait_for:
     host: "{{ ansible_ssh_host }}"
     port: 22
+    search_regex: OpenSSH
     state: started
     timeout: 600
     delay: 300
   delegate_to: localhost
+  when: reboot.changed
