@@ -10,7 +10,7 @@
     name: "{{docker_packages}}"
     state: absent
   become: yes
-  when: docker_ce.results[0] != 'already installed'
+  when: docker_ce.results[0].find("already installed") != -1
 
 - name: install required docker packages
   yum:
@@ -25,7 +25,7 @@
 - name: add latest docker repo
   command: yum-config-manager --add-repo {{docker_repo}}
   become: yes
-  when: docker_ce.results[0] != 'already installed'
+  when: docker_ce.results[0].find("already installed") != -1
 
 - name: install docker ce
   yum:
