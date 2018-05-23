@@ -3,6 +3,7 @@
     name: cockpit-kubernetes
     state: present
   become: yes
+  register: cockpit_kubernetes
 
 - name: restart service
   service:
@@ -10,3 +11,4 @@
     state: restarted
     enabled: yes
   become: yes
+  when: cockpit_kubernetes.changed
