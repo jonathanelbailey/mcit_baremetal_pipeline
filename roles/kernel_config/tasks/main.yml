@@ -1,6 +1,7 @@
 - name: check if swap is enabled
   command: swapon -s
   register: swap
+  become: yes
 
 - name: disable swap
   command: swapoff -a
