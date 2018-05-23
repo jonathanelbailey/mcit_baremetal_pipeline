@@ -41,6 +41,7 @@
 
 - name: set selinux to permissive
   selinux:
+    policy: targeted
     state: permissive
   become: yes
 
@@ -49,3 +50,18 @@
     name: firewalld
     state: stopped
     enabled: no
+
+- name: reboot after configuration changes
+  command: reboot
+  async: 0
+  poll: 0
+
+- name: wait for server to come back
+  local_action: 
+    wait_for:
+    host: {{ ansible_ssh_host }}
+    port: 22
+    state: started
+    timeout: 600
+    delay: 300
+  delegate_to: localhost

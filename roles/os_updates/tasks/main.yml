@@ -18,3 +18,18 @@
     - python-pip
     - python-virtualenv
   become: yes
+
+- name: reboot after updates
+  command: reboot
+  async: 0
+  poll: 0
+
+- name: wait for server to come back
+  local_action: 
+    wait_for:
+    host: {{ ansible_ssh_host }}
+    port: 22
+    state: started
+    timeout: 600
+    delay: 300
+  delegate_to: localhost
