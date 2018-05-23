@@ -32,7 +32,7 @@
   when: nested_status == "N"
 
 - name: enable nested virtualization
-  command: {{item}}
+  command: "{{item}}"
   with_items:
     - modprobe -r kvm_intel
     - modprobe -a kvm_intel
