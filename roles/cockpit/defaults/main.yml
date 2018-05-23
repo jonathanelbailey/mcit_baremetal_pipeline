@@ -4,7 +4,7 @@ cockpit_packages:
   - cockpit-system
   - cockpit-selinux
   - cockpit-ws
-#  - cockpit-networkmanager
+  - cockpit-networkmanager
   - cockpit-storaged
   - cockpit-packagekit
   - cockpit-kdump
