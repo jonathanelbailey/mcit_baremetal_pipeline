@@ -9,7 +9,7 @@
     - cockpit-networkmanager
     - cockpit-storaged
     - cockpit-packagekit
-    - cockpit-kubernetes
+    # - cockpit-kubernetes
     - cockpit-docker
     - cockpit-selinux
     - cockpit-system
