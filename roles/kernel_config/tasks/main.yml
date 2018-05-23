@@ -70,6 +70,6 @@
     search_regex: OpenSSH
     state: started
     timeout: 600
-    delay: 360
+    delay: 420
   delegate_to: localhost
   when: reboot.changed
