@@ -1,6 +1,6 @@
 - name: download scope
   get_url:
-    url: git.io/scope
+    url: https://git.io/scope
     dest: /usr/local/bin/scope
     mode: 700
   become: yes

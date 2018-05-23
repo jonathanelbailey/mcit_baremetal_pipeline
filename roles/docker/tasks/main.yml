@@ -1,19 +1,16 @@
+- name: check if docker-ce is installed
+  yum:
+    name: docker-ce
+    state: installed
+  become: yes
+  register: docker-ce
+
 - name: remove existing docker packages
   yum:
-    name: "{{item}}"
+    name: "{{docker_packages}}"
     state: absent
-  with_items:
-    - docker
-    - docker-client
-    - docker-client-latest
-    - docker-common
-    - docker-latest
-    - docker-latest-logrotate
-    - docker-logrotate
-    - docker-selinux
-    - docker-engine-selinux
-    - docker-engine
   become: yes
+  when: docker-ce.results[0].yumstate != 'installed'
 
 - name: install required docker packages
   yum:
@@ -28,6 +25,7 @@
 - name: add latest docker repo
   command: yum-config-manager --add-repo {{docker_repo}}
   become: yes
+  when: docker-ce.results[0].yumstate != 'installed'
 
 - name: install docker ce
   yum:
