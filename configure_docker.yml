@@ -1,7 +1,4 @@
 - hosts: all
   roles:
-    - os_updates
-    - kernel_config
-    - cockpit
     - docker
     - cockpit: cockpit-docker

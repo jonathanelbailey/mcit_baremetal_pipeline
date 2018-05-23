@@ -7,6 +7,4 @@ cockpit_packages:
   - cockpit-networkmanager
   - cockpit-storaged
   - cockpit-packagekit
-  # - cockpit-kubernetes
-  - cockpit-docker
   - cockpit-kdump
