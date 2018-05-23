@@ -1,7 +1,7 @@
 - name: disable swap
   command: swapoff -a
   become: yes
-  when: ansible_swaptotal_mb == 0
+  when: ansible_swaptotal_mb != 0
 
 - name: remove swap partition from fstab
   lineinfile:
