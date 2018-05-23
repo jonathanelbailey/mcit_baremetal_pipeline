@@ -31,7 +31,7 @@
     - 'options kvm-intel enable_apicv=1'
     - 'options kvm-intel ept=1'
   become: yes
-  when: nested_status['content'] | b64decode is "N"
+  when: nested_status['content'] | b64decode | match("N")
 
 - name: enable nested virtualization
   command: "{{item}}"
@@ -40,7 +40,7 @@
     - modprobe -a kvm_intel
   register: enable_nested
   become: yes
-  when: nested_status['content'] | b64decode is "N" 
+  when: nested_status['content'] | b64decode | match("N")
 
 - name: set selinux to permissive
   selinux:
@@ -61,7 +61,7 @@
   poll: 0
   become: yes
   register: reboot
-  when: nested_status['content'] | b64decode is "N"
+  when: nested_status['content'] | b64decode | match("N")
 
 - name: wait for server after kernel config reboot
   wait_for:
