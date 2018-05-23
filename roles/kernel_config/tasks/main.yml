@@ -1,0 +1,51 @@
+- name: disable swap
+  command: swapoff -a
+  become: yes
+
+- name: remove swap partition from fstab
+  lineinfile:
+    path: /etc/fstab
+    state: absent
+    regexp: '^/dev/mapper/centos-swap.*$'
+  become: yes
+
+- name: check nested virtualization status
+  command: cat /sys/module/kvm_intel/parameters/nested
+  register: nested_status
+  become: yes
+
+- name: create kvm-intel nested conf
+  lineinfile:
+    path: /etc/modprobe.d/kvm-nested.conf
+    state: present
+    create: yes
+    regexp: "{{item}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - 'options kvm-intel nested=1'
+    - 'options kvm-intel enable_shadow_vmcs=1'
+    - 'options kvm-intel enable_apicv=1'
+    - 'options kvm-intel ept=1'
+  become: yes
+  when: nested_status == "N"
+
+- name: enable nested virtualization
+  command: {{item}}
+  with_items:
+    - modprobe -r kvm_intel
+    - modprobe -a kvm_intel
+  become: yes
+  when: nested_status == "N"
+
+- name: set selinux to permissive
+  selinux:
+    state: permissive
+  become: yes
+
+- name: stop and disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no

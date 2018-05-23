@@ -1,0 +1,24 @@
+- name: install packages
+  yum:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - cockpit
+    - cockpit-dashboard
+    - cockpit-ws
+    - cockpit-networkmanager
+    - cockpit-storaged
+    - cockpit-packagekit
+    - cockpit-kubernetes
+    - cockpit-docker
+    - cockpit-selinux
+    - cockpit-system
+    - cockpit-kdump
+  become: yes
+
+- name: start and enable service
+  service:
+    name: cockpit.socket
+    state: started
+    enabled: yes
+  become: yes
