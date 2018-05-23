@@ -57,8 +57,7 @@
   poll: 0
 
 - name: wait for server to come back
-  local_action: 
-    wait_for:
+  wait_for:
     host: "{{ ansible_ssh_host }}"
     port: 22
     state: started
