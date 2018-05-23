@@ -13,7 +13,7 @@ node {
                     hostKeyChecking: false,
                     colorized: true,
                     extraVars: [
-                        ansible_become_pass: [ value: $sudo_pass, hidden: true ]
+                        ansible_become_pass: [ value: "$sudo_pass", hidden: true ]
                     ]
                 )
             }
