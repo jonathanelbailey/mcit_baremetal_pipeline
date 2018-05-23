@@ -4,9 +4,6 @@
     state: installed
   become: yes
   register: docker_ce
-  
-- debug:
-    msg: "{{docker_ce}}"
 
 - name: remove existing docker packages
   yum:
