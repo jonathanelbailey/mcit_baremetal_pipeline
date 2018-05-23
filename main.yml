@@ -1,7 +1,14 @@
 - hosts: all
-  roles:
-    - os_updates
-    - kernel_config
-    - cockpit
-    - docker
-    - cockpit: cockpit-docker
+  tasks:
+    - include_role:
+        name: os_updates
+    - include_role:
+        name: kernel_config
+    - include_role:
+        name: cockpit
+        tasks_from: cockpit
+    - include_role:
+        name: docker
+    - include_role:
+        name: cockpit
+        tasks_from: cockpit-docker

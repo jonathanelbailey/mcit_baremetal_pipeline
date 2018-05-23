@@ -1,0 +1,11 @@
+kubernetes_repo: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+kubernetes_gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+kubeadm_conf: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+dns_svc_cidr: 10.3.3.10
+pod_net_cidr: 10.1.0.0./16
+service_cidr: 10.3.3.0/24
+
+rbac_config: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/rbac.yaml
+canal_config: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/canal.yaml
+canal_config_path: /tmp/canal.yaml

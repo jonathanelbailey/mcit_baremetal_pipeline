@@ -1,0 +1,19 @@
+- name: download scope
+  get_url:
+    url: git.io/scope
+    dest: /usr/local/bin/scope
+    mode: 700
+  become: yes
+
+- name: add systemd service
+  template:
+    src: scope.service.j2
+    dest: /etc/systemd/system/scope.service
+  become: yes
+
+- name: reload service
+  service:
+    name: scope
+    state: reloaded
+    enabled: true
+  become: yes

@@ -1,0 +1,112 @@
+- name: install kubernetes repo
+  yum_repository:
+    name: kubernetes
+    description: kubernetes repo
+    baseurl: {{kubernetes_repo}}
+    gpgcheck: yes
+    gpgkey: {{kubernetes_gpgkey}}
+    file: kubernetes
+
+- name: install packages
+  yum:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - ebtables
+    - kubadm
+    - kubectl
+    - kubelet
+    - kubernetes-cni
+    - git
+    - gcc
+  become: yes
+
+- name: get cgroup info
+  command: docker info | grep "Cgroup Driver" | awk '{print $3}'
+  register: cgroup_info
+  become: yes
+
+- name: enable the proper cgroup driver
+  replace:
+    path: "{{kubeadm_conf}}"
+    regexp: "systemd"
+    replace: "{{cgroup_info}}"
+  become: yes
+
+- name: set dns server inside service cidr
+  replace:
+    path: "{{kubeadm_conf}}"
+    regexp: 10.96.0.10
+    replace: "{{dns_svc_cidr}}"
+  become: yes
+
+- name: reload kubelet
+  service:
+    name: kubelet
+    state: reloaded
+  become: yes
+
+- name: start and enable kubelet
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+  become: yes
+
+- name: deploy kubernetes with kubeadm
+  command: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
+  become: yes
+
+- name: get current user
+  command: id -u
+  register: current_user
+
+- name: get current group
+  command: id -g
+  register: current_group
+
+- name: make kubeadm creds folder
+  file:
+    name: $HOME/.kube
+    state: directory
+
+- name: copy admin.conf to kube conf
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: $HOME/.kube/config
+    owner: current_user
+    group: current_group
+    remote_src: yes
+  become: yes
+
+- name: apply rbac config
+  k8s_raw:
+    state: present
+    src: "{{rbac_config}}"
+    force: yes
+
+- name: download canal config
+  get_url:
+    url: "{{canal_config}}"
+    dest: "{{canal_config_path}}"
+
+- name: update canal config
+  replace:
+    path: "{{canal_config_path}}"
+    regexp: "10.244.0.0/16"
+    replace: "{{pod_net_cidr}}"
+  become: yes
+
+- name: apply canal config
+  k8s_raw:
+    state: present
+    src: "{{canal_config_path}}"
+    force: yes
+
+- name: taint nodes
+  command: kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
+
+
+
+
+

@@ -1,0 +1,150 @@
+- name: override default rbac settings
+  k8s_raw:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1beta1
+        kind: ClusterRoleBinding
+        metadata:
+          name: cluster-admin
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: cluster-admin
+        subjects:
+        - kind: Group
+          name: system:masters
+        - kind: Group
+          name: system:authenticated
+        - kind: Group
+          name: system:unauthenticated
+
+- name: get helm install script
+  get_url:
+    url: "{{helm_install}}"
+    dest: "{{helm_install_path}}" 
+    mode: 700
+  
+- name: run helm install script
+  script: "{{root_path}}/get_helm.sh"
+
+- name: helm init
+  command: helm init
+
+- name: install epel
+  yum:
+    name: epel-release
+    state: present
+  become: yes
+
+- name: install deps
+  yum:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - ansible
+    - python-pip
+    - python-devel
+  become: yes
+
+- name: create kolla workdir
+  file:
+    path: "{{workdir}}"
+    state: directory
+
+- name: clone kolla-ansible repo
+  git:
+    repo: http://github.com/openstack/kolla-ansible
+    dest: "{{workdir}}/kolla-ansible"
+
+- name: clone kolla-kubernetes repo
+  git:
+    repo: https://github.com/jonathanelbailey/kolla-kubernetes.git
+    dest: "{{workdir}}/kolla-kubernetes"
+
+- name: install deps from repos
+  pip:
+    name: "{{item}}"
+    state: latest
+  with_items:
+    - "{{workdir}}/kolla-ansible/"
+    - "{{workdir}}/kolla-kubernetes/"
+  become: yes
+
+- name: copy default kolla config to /etc
+  copy:
+    src: /usr/share/kolla-ansible/etc_examples/kolla
+    dest: /etc
+    remote_src: yes
+  become: yes
+
+- name: copy default kolla-kubernetes config to /etc
+  copy:
+    src: "{{workdir}}/kolla-kubernetes/etc/kolla-kubernetes"
+    dest: /etc
+    remote_src: yes
+  become: yes
+
+- name: generate default passwords
+  command: kolla-kubernetes-genpwd
+  become: yes
+
+- name: create kolla namespace
+  k8s_raw:
+    state: present
+    name: kolla
+    kind: Namespace
+
+- name: add kolla_compute label to node
+  command: kubectl label node $(hostname) kolla_compute=true
+
+- name: add kolla_controller label to node
+  command: kubectl label node $(hostname) kolla_controller=true
+
+- name: add globals.yaml
+  template:
+    src: globals.yaml.j2
+    dest: "{{ globals_path }}"
+  become: yes
+
+- name: create kolla config path
+  file:
+    state: directory
+    path: /etc/kolla/config
+  become: yes
+
+- name: add nova.conf
+  template:
+    src: nova.conf.j2
+    dest: /etc/kolla/config/nova.conf
+  become: yes
+
+- name: create the default configuration
+  command: ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla {{workdir}}/kolla-kubernetes/ansible/site.yml
+    chdir: "{{workdir}}"
+  become: yes
+
+- name: generate the kuberenetes secrets
+  command: "{{workdir}}/kolla-kubernetes/tools/secret-generator.py create"
+    chdir: "{{workdir}}"
+
+- name: create and register the kolla config maps
+  command: kollakube res create configmap \
+    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
+    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
+    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
+    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
+    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
+    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
+    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
+    cinder-scheduler cinder-volume iscsid tgtd keepalived \
+    placement-api placement-api-haproxy
+
+- name: build helm microcharts, service charts, and metacharts
+  command: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
+    chdir: "{{workdir}}"
+
+- name: copy cloud.yaml to workdir
+  template:
+    src: cloud.yaml.j2
+    dest: "{{workdir}}/cloud.yaml"
+

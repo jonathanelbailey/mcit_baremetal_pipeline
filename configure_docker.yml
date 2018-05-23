@@ -1,4 +1,9 @@
 - hosts: all
-  roles:
-    - docker
-    - { role: cockpit, tags: ['docker']}
+  tasks:
+    - include_role:
+        name: docker
+    - include_role:
+        name: cockpit
+        tasks_from: cockpit-docker
+    - include_role:
+        name: weave_scope

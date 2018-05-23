@@ -1,5 +1,9 @@
 - hosts: all
-  roles:
-    - os_updates
-    - kernel_config
-    - cockpit
+  tasks:
+    - include_role:
+        name: os_updates
+    - include_role:
+        name: kernel_config
+    - include_role:
+        name: cockpit
+        tasks_from: cockpit
