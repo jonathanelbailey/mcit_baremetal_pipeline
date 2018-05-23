@@ -1,12 +1,7 @@
-- name: check if swap is enabled
-  command: swapon -s
-  register: swap
-  become: yes
-
 - name: disable swap
   command: swapoff -a
   become: yes
-  when: swap != ""
+  when: ansible_swaptotal_mb == 0
 
 - name: remove swap partition from fstab
   lineinfile:
@@ -16,7 +11,8 @@
   become: yes
 
 - name: check nested virtualization status
-  command: cat /sys/module/kvm_intel/parameters/nested
+  slurp:
+    src: /sys/module/kvm_intel/parameters/nested
   register: nested_status
   become: yes
 
@@ -35,7 +31,7 @@
     - 'options kvm-intel enable_apicv=1'
     - 'options kvm-intel ept=1'
   become: yes
-  when: nested_status == "N"
+  when: "{{ nested_status['content'] | b64decode }}" == "N"
 
 - name: enable nested virtualization
   command: "{{item}}"
