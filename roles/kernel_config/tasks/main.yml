@@ -6,7 +6,7 @@
 - name: disable swap
   command: swapoff -a
   become: yes
-  when: swap is defined
+  when: swap != ""
 
 - name: remove swap partition from fstab
   lineinfile:
@@ -34,7 +34,6 @@
     - 'options kvm-intel enable_shadow_vmcs=1'
     - 'options kvm-intel enable_apicv=1'
     - 'options kvm-intel ept=1'
-  register: created_nested_conf
   become: yes
   when: nested_status == "N"
 
@@ -45,7 +44,7 @@
     - modprobe -a kvm_intel
   register: enable_nested
   become: yes
-  when: create_nested_conf.changed
+  when: nested_status == "N"
 
 - name: set selinux to permissive
   selinux:
@@ -66,7 +65,7 @@
   poll: 0
   become: yes
   register: reboot
-  when: enable_nested.changed
+  when: nested_status == "N"
 
 - name: wait for server after kernel config reboot
   wait_for:
