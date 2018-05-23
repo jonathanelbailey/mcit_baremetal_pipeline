@@ -21,7 +21,7 @@
     path: /etc/modprobe.d/kvm-nested.conf
     state: present
     create: yes
-    regexp: "{{item}}"
+    line: "{{item}}"
     owner: root
     group: root
     mode: 0644
@@ -32,7 +32,7 @@
     - 'options kvm-intel ept=1'
   become: yes
   when: nested_status['content'] | b64decode | match("N") 
-  
+
 - name: enable nested virtualization
   command: "{{item}}"
   with_items:
