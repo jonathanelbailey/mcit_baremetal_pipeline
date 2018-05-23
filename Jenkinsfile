@@ -5,7 +5,7 @@ node {
     }
     stage('Testing Ansible') {
         ansiblePlaybook(
-            playbook: 'main.yml',
+            playbook: "$env.WORKSPACE/main.yml",
             inventory: 'hosts',
             credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c'
         )
