@@ -11,7 +11,7 @@ node {
                     inventory: "$env.WORKSPACE/hosts",
                     credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c',
                     hostKeyChecking: false,
-                    colorized: true.
+                    colorized: true,
                     extraVars: [
                         ansible_sudo_pass: [ value: $sudo_pass, hidden: true ]
                     ]
