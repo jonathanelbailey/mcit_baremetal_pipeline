@@ -20,11 +20,11 @@
   become: yes
 
 - name: reboot after updates
-  command: reboot
+  command: shutdown -r +1
   async: 0
   poll: 0
 
-- name: wait for server to come back
+- name: wait for server after updates reboot
   wait_for:
     host: "{{ ansible_ssh_host }}"
     port: 22
