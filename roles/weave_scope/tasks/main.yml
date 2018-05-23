@@ -10,6 +10,7 @@
     src: scope.service.j2
     dest: /etc/systemd/system/scope.service
   become: yes
+  register: scope_service
 
 - name: reload service
   service:
@@ -17,3 +18,4 @@
     state: reloaded
     enabled: true
   become: yes
+  when: scope_service.changed
