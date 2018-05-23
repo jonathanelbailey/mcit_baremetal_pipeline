@@ -7,4 +7,4 @@ cockpit_packages:
   # - cockpit-networkmanager
   - cockpit-storaged
   - cockpit-packagekit
-  - cockpit-kdump
+  # - cockpit-kdump
