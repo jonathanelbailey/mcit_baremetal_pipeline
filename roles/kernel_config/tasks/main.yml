@@ -31,7 +31,7 @@
     - 'options kvm-intel enable_apicv=1'
     - 'options kvm-intel ept=1'
   become: yes
-  when: "{{ nested_status['content'] | b64decode }}" == "N"
+  when: "{{ nested_status['content'] | b64decode | match("N") }}"
 
 - name: enable nested virtualization
   command: "{{item}}"
