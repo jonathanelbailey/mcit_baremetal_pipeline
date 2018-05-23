@@ -4,13 +4,15 @@
     state: installed
   become: yes
   register: docker_ce
+  debug:
+    msg: "{{docker_ce}}"
 
 - name: remove existing docker packages
   yum:
     name: "{{docker_packages}}"
     state: absent
   become: yes
-  when: docker_ce.results[0].yumstate != 'installed'
+  when: docker_ce.results != 'installed'
 
 - name: install required docker packages
   yum:
@@ -25,7 +27,7 @@
 - name: add latest docker repo
   command: yum-config-manager --add-repo {{docker_repo}}
   become: yes
-  when: docker_ce.results[0].yumstate != 'installed'
+  when: docker_ce.results != 'installed'
 
 - name: install docker ce
   yum:
