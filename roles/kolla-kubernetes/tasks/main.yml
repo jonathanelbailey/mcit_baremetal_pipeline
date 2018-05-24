@@ -1,22 +1,23 @@
 - name: override default rbac settings
-  k8s_raw:
-    state: present
-    definition:
-      apiVersion: rbac.authorization.k8s.io/v1beta1/
-      kind: ClusterRoleBinding
-      metadata:
-        name: cluster-admin
-      roleRef:
-        apiGroup: rbac.authorization.k8s.io
-        kind: ClusterRole
-        name: cluster-admin
-      subjects:
-      - kind: Group
-        name: system:masters
-      - kind: Group
-        name: system:authenticated
-      - kind: Group
-        name: system:unauthenticated
+  shell: |
+    kubectl apply -f <(cat <<EOF
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRoleBinding
+    metadata:
+      name: cluster-admin
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cluster-admin
+    subjects:
+    - kind: Group
+      name: system:masters
+    - kind: Group
+      name: system:authenticated
+    - kind: Group
+      name: system:unauthenticated
+    EOF
+    )
   run_once: yes
 
 - name: get helm install script
@@ -27,11 +28,13 @@
   
 - name: run helm install script
   script: "{{root_path}}/get_helm.sh"
+  run_once: yes
 
 - name: helm init
   shell: helm init
   args:
     chdir: "{{root_path}}"
+  run_once: yes
 
 - name: install epel
   yum:
@@ -92,6 +95,7 @@
   args:
     chdir: "{{workdir}}"
   become: yes
+  run_once: yes
 
 - name: create kolla namespace
   k8s_raw:
@@ -103,11 +107,13 @@
   shell: kubectl label node $(hostname) kolla_compute=true
   args:
     chdir: "{{workdir}}"
+  run_once: yes
 
 - name: add kolla_controller label to node
   shell: kubectl label node $(hostname) kolla_controller=true
   args:
     chdir: "{{workdir}}"
+  run_once: yes
 
 - name: add globals.yaml
   template:
@@ -132,11 +138,13 @@
   args:
     chdir: "{{workdir}}"
   become: yes
+  run_once: yes
 
 - name: generate the kuberenetes secrets
   shell: "{{workdir}}/kolla-kubernetes/tools/secret-generator.py create"
   args:
     chdir: "{{workdir}}"
+  run_once: yes
 
 - name: create and register the kolla config maps
   shell: |
@@ -152,11 +160,13 @@
       placement-api placement-api-haproxy
   args:
     chdir: "{{workdir}}"
+  run_once: yes
 
 - name: build helm microcharts, service charts, and metacharts
   shell: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
   args:
     chdir: "{{workdir}}"
+  run_once: yes
 
 - name: copy cloud.yaml to workdir
   template:
