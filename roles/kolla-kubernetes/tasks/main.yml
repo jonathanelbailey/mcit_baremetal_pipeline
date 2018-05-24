@@ -39,7 +39,7 @@
   when: helm_exists.stdout != "/usr/local/bin/helm"
 
 - name: check helm version
-  shell: helm version -s --tiller-connection-timeout 10 | awk '{print $1}'
+  shell:  helm version -s --tiller-connection-timeout 10 2>&1 | awk '{print $1}'
   args:
     chdir: "{{workdir}}"
   register: tiller_deployed
