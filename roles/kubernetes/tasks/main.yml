@@ -31,7 +31,7 @@
   replace:
     path: "{{kubeadm_conf}}"
     regexp: 10.96.0.10
-    replace: "{{dns_svc_cidr}}"
+    replace: "{{dns_svc_cidr.stdout}}"
   register: dns_kube
   become: yes
 
@@ -39,33 +39,15 @@
   service:
     name: kubelet
     state: reloaded
-  become: yes
-  when: cgroup_kube.changed or dns_kube.changed
-
-- name: start and enable kubelet
-  service:
-    name: kubelet
-    state: started
     enabled: yes
   become: yes
+  when: cgroup_kube.changed or dns_kube.changed
 
 - name: check kubernetes status
   stat:
     path: /etc/kubernetes/admin.conf
   become: yes
   register: cluster_status
-
-- name: check if kubelet is listening
-  shell: ss -4 state listening -p | grep kubelet
-  become: yes
-  register: kube_listening
-
-- name: clean failed kubelet listener
-  command: kubeadm reset
-  become: yes
-  when: 
-    - cluster_status.stat.exists == False
-    - kube_listening.stdout.find("kubelet") != -1
 
 - name: deploy kubernetes with kubeadm
   command: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
