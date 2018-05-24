@@ -36,9 +36,7 @@
   become: yes
 
 - name: reload kubelet
-  service:
-    name: kubelet
-    state: reloaded
+  systemd: daemon-reload=yes
   become: yes
   when: cgroup_kube.changed or dns_kube.changed
 
