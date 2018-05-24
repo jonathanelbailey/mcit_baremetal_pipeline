@@ -15,7 +15,7 @@
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: rbac_exists.stdout == cluster-admin
+  when: rbac_exists.stdout != "cluster-admin"
 
 - name: check helm
   shell: which helm
@@ -29,21 +29,21 @@
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
   run_once: yes
-  when: helm_exists.stdout == /usr/local/bin/helm
+  when: helm_exists.stdout != "/usr/local/bin/helm"
   
 - name: run helm install script
   shell: ./get_helm.sh
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout == /usr/local/bin/helm
+  when: helm_exists.stdout != /usr/local/bin/helm
 
 - name: helm init
   shell: helm init
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout == /usr/local/bin/helm
+  when: helm_exists.stdout != /usr/local/bin/helm
 
 - name: install epel
   yum:
@@ -120,7 +120,7 @@
     chdir: "{{workdir}}"
   become: yes
   run_once: yes
-  when: passwords.stdout == "aodh_database_password:"
+  when: passwords.stdout != "aodh_database_password:"
 
 - name: create kolla namespace
   k8s_raw:
@@ -145,14 +145,14 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: compute_label.stdout == kolla_compute=true
+  when: compute_label.stdout != kolla_compute=true
 
 - name: add kolla_controller label to node
   shell: kubectl label node $(hostname) kolla_controller=true
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: controller_label.stdout == kolla_controller=true
+  when: controller_label.stdout != kolla_controller=true
 
 - name: create add to globals.yaml
   template:
@@ -197,7 +197,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: secrets_count.stdout == 200
+  when: secrets_count.stdout != 200
 
 - name: create and register the kolla config maps
   shell: |
@@ -226,7 +226,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: charts_count.stdout == 200
+  when: charts_count.stdout != 200
 
 - name: copy cloud.yaml to workdir
   template:
