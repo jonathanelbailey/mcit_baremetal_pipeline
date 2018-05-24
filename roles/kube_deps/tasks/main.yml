@@ -1,6 +1,6 @@
 - name: install pyaml deps
   yum:
-    name: gcc
+    name: "{{pyaml_deps}}"
     state: present
   become: yes
 

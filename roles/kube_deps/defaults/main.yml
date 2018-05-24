@@ -1,0 +1,3 @@
+pyaml_deps:
+  - gcc
+  - libyaml
