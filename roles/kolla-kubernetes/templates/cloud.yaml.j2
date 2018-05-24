@@ -49,7 +49,7 @@ global:
        all:
          add_port: true
          ext_bridge_name: br-ex
-         ext_interface_name: "{{ mgmt_int }}"
+         ext_interface_name: "{{ neutron_int }}"
          setup_bridge: true
      horizon:
        all:
