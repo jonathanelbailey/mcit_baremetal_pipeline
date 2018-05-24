@@ -59,6 +59,10 @@
   register: kubelet_status
   become: yes
 
+- name: check to see if kubernetes is up
+  shell: kubectl cluster-info | grep KubeDNS
+  register: cluster_status
+
 - name: configure iptables bridge
   sysctl:
     name: "{{item}}"
@@ -75,7 +79,7 @@
   shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
   run_once: yes
-  when: kubelet_status.stdout.find("activating") != -1
+  when: (kubelet_status.stdout.find("activating") != -1) or (cluster_status.stdout.find('KubeDNS is running'))
 
 - name: make kubeadm creds folder
   file:
@@ -91,10 +95,6 @@
     remote_src: yes
   become: yes
 
-- name: check to see if kubernetes is up
-  shell: kubectl cluster-info | grep KubeDNS
-  register: cluster_status
-
 - name: check clusterrolebinding
   shell: kubectl get clusterrolebinding --all-namespaces | grep canal-calico | awk '{print $1}'
   args:
@@ -104,15 +104,7 @@
 - name: apply rbac config
   shell: kubectl apply -f {{rbac_config}}
   run_once: yes
-  when: 
-    - cluster_status.stdout.find("KubeDNS is running") != -1
-    - rbac_deployed.stdout != "canal-calico"
-
-- name: download canal config
-  get_url:
-    url: "{{canal_config}}"
-    dest: "{{canal_config_path}}"
-  when: cluster_status.stdout.find("KubeDNS is running") != -1
+  when: rbac_deployed.stdout != "canal-calico"
 
 - name: check canal configmap
   shell: kubectl get configmap --all-namespaces | grep canal-config | awk '{print $2}'
@@ -120,21 +112,31 @@
     chdir: "{{ansible_env.HOME}}"
   register: canal_deployed
 
+- name: download canal config
+  get_url:
+    url: "{{canal_config}}"
+    dest: "{{canal_config_path}}"
+  when: canal_deployed.stdout != "canal-config"
+
 - name: update canal config
   replace:
     path: "{{canal_config_path}}"
     regexp: 10.244.0.0/16
     replace: "{{pod_net_cidr}}"
-  when: 
-    - cluster_status.stdout.find("KubeDNS is running") != -1
-    - canal_deployed.stdout != "canal-config"
+  when: canal_deployed.stdout != "canal-config"
 
 - name: apply canal config
   shell: kubectl apply -f {{canal_config_path}}
   run_once: yes
-  when: cluster_status.stdout.find("KubeDNS is running") != -1
+  when: canal_deployed.stdout != "canal-config"
+
+- name: check master status
+  shell: kubectl get nodes --all-namespaces | grep master | awk '{print $2}'
+  args:
+    chdir: "{{ansible_env.HOME}}"
+  register: master_status
 
 - name: taint nodes
   command: kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
   run_once: yes
-  when: cluster_status.stdout.find("KubeDNS is running") != -1
+  when: master_status.stdout == "NotReady"
