@@ -1,6 +1,6 @@
 - name: override default rbac settings
   shell: |
-    kubectl apply -f <(cat <<EOF
+    kubectl apply -f <\(cat <<EOF
     apiVersion: rbac.authorization.k8s.io/v1beta1
     kind: ClusterRoleBinding
     metadata:
@@ -17,7 +17,7 @@
     - kind: Group
       name: system:unauthenticated
     EOF
-    )
+    \)
   args:
     chdir: "{{root_path}}"
   run_once: yes
