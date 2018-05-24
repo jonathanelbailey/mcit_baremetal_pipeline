@@ -29,7 +29,7 @@
 - name: set dns server inside service cidr
   replace:
     path: "{{kubeadm_conf}}"
-    regexp: '10\.96\.0\.10'
+    regexp: 10.96.0.10
     replace: "{{dns_svc_cidr}}"
   register: dns_kube
   become: yes
@@ -84,7 +84,7 @@
 - name: update canal config
   replace:
     path: "{{canal_config_path}}"
-    regexp: "10\.244\.0\.0/16"
+    regexp: 10.244.0.0/16
     replace: "{{pod_net_cidr}}"
   become: yes
 
