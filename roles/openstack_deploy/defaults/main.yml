@@ -1,0 +1,2 @@
+root_path: "{{ansible_env.HOME}}"
+workdir: "{{root_path}}/kolla-bringup"
