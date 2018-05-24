@@ -79,16 +79,9 @@
     remote_src: yes
   become: yes
 
-- name: download rbac config
-  get_url:
-    url: "{{rbac_config}}"
-    dest: "{{rbac_config_path}}"
-
 - name: apply rbac config
-  k8s_raw:
-    state: present
-    src: "{{rbac_config_path}}"
-    force: yes
+  shell: kubectl apply -f {{rbac_config}}
+  become: yes
 
 - name: download canal config
   get_url:
