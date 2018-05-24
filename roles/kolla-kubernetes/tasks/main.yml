@@ -190,7 +190,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: secrets_count.stdout != 122
+  when: secrets_count.stdout != "122"
 
 - name: check for configmaps
   shell: kollakube res status configmap tgtd | grep tgtd | awk '{print $1}'
@@ -213,7 +213,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: configmaps.stdout != "tgtd"
+  when: configmaps_exist.stdout != "tgtd"
 
 - name: check for charts
   shell: ls | grep ".tgz" | wc -l
