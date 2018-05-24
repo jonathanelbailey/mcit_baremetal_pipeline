@@ -10,22 +10,16 @@
     chdir: "{{workdir}}"
   register: rbac_exists
 
-- debug:
-    msg: "{{rbac_exists}}"
-
 - name: override default rbac settings
   shell: kubectl apply -f {{root_path}}/rbac_override.yaml
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: rbac_exists.stdout == "cluster-admin"
+  when: rbac_exists.stdout == cluster-admin
 
 - name: check helm
   shell: which helm
   register: helm_exists
-
-- debug:
-    msg: "{{helm_exists}}"
 
 - name: get helm install script
   get_url:
@@ -35,21 +29,21 @@
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
   run_once: yes
-  when: helm_exists.stdout == "/usr/local/bin/helm"
+  when: helm_exists.stdout == /usr/local/bin/helm
   
 - name: run helm install script
   shell: ./get_helm.sh
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout == "/usr/local/bin/helm"
+  when: helm_exists.stdout == /usr/local/bin/helm
 
 - name: helm init
   shell: helm init
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout == "/usr/local/bin/helm"
+  when: helm_exists.stdout == /usr/local/bin/helm
 
 - name: install epel
   yum:
@@ -99,16 +93,13 @@
     - /etc/kolla-kubernetes
   register: folders_exist
 
-- debug:
-    msg: "{{folders_exist}}"
-
 - name: copy default kolla config to /etc
   shell: cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
   args:
     chdir: "{{workdir}}"
   become: yes
   run_once: yes
-  when: folders_exist[0].stat.exists == false
+  when: folders_exist.results[0].stat.exists == false
 
 - name: copy default kolla-kubernetes config to /etc
   shell: cp -aR kolla-kubernetes/etc/kolla-kubernetes /etc
@@ -116,7 +107,7 @@
     chdir: "{{workdir}}"
   become: yes
   run_once: yes
-  when: folders_exist[1].stat.exists == false
+  when: folders_exist.results[1].stat.exists == false
 
 - name: check that password are populated
   shell: head -n 1 /etc/kolla/passwords.yml | awk '{print $1}'
