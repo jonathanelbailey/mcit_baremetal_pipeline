@@ -36,14 +36,14 @@
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout != /usr/local/bin/helm
+  when: helm_exists.stdout != "/usr/local/bin/helm"
 
 - name: helm init
   shell: helm init
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout != /usr/local/bin/helm
+  when: helm_exists.stdout != "/usr/local/bin/helm"
 
 - name: install epel
   yum:
