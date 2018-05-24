@@ -64,7 +64,7 @@
   command: kubeadm reset
   become: yes
   when: 
-    - cluster_status_stat.exists == False
+    - cluster_status.stat.exists == False
     - kube_listening.stdout.find("kubelet") != -1
 
 - name: deploy kubernetes with kubeadm
