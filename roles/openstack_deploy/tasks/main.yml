@@ -45,7 +45,7 @@
 
 - name: wait for openstack to deploy
   pause:
-    minutes: 2
+    minutes: 10
   when: os_deploy.changed
 
 - name: build keystone local admin
