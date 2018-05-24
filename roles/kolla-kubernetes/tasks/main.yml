@@ -28,7 +28,9 @@
   script: "{{root_path}}/get_helm.sh"
 
 - name: helm init
-  command: helm init
+  shell: helm init
+  args:
+    chdir: "{{root_path}}"
 
 - name: install epel
   yum:
@@ -85,7 +87,9 @@
   become: yes
 
 - name: generate default passwords
-  command: kolla-kubernetes-genpwd
+  shell: kolla-kubernetes-genpwd
+  args:
+    chdir: "{{workdir}}"
   become: yes
 
 - name: create kolla namespace
@@ -95,10 +99,14 @@
     kind: Namespace
 
 - name: add kolla_compute label to node
-  command: kubectl label node $(hostname) kolla_compute=true
+  shell: kubectl label node $(hostname) kolla_compute=true
+  args:
+    chdir: "{{workdir}}"
 
 - name: add kolla_controller label to node
-  command: kubectl label node $(hostname) kolla_controller=true
+  shell: kubectl label node $(hostname) kolla_controller=true
+  args:
+    chdir: "{{workdir}}"
 
 - name: add globals.yaml
   template:
@@ -119,28 +127,34 @@
   become: yes
 
 - name: create the default configuration
-  command: ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla {{workdir}}/kolla-kubernetes/ansible/site.yml
+  shell: ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla {{workdir}}/kolla-kubernetes/ansible/site.yml
+  args:
     chdir: "{{workdir}}"
   become: yes
 
 - name: generate the kuberenetes secrets
-  command: "{{workdir}}/kolla-kubernetes/tools/secret-generator.py create"
+  shell: "{{workdir}}/kolla-kubernetes/tools/secret-generator.py create"
+  args:
     chdir: "{{workdir}}"
 
 - name: create and register the kolla config maps
-  command: kollakube res create configmap \
-    mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
-    nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
-    glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
-    neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
-    openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
-    nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
-    nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
-    cinder-scheduler cinder-volume iscsid tgtd keepalived \
-    placement-api placement-api-haproxy
+  shell: |
+    kollakube res create configmap \
+      mariadb keystone horizon rabbitmq memcached nova-api nova-conductor \
+      nova-scheduler glance-api-haproxy glance-registry-haproxy glance-api \
+      glance-registry neutron-server neutron-dhcp-agent neutron-l3-agent \
+      neutron-metadata-agent neutron-openvswitch-agent openvswitch-db-server \
+      openvswitch-vswitchd nova-libvirt nova-compute nova-consoleauth \
+      nova-novncproxy nova-novncproxy-haproxy neutron-server-haproxy \
+      nova-api-haproxy cinder-api cinder-api-haproxy cinder-backup \
+      cinder-scheduler cinder-volume iscsid tgtd keepalived \
+      placement-api placement-api-haproxy
+  args:
+    chdir: "{{workdir}}"
 
 - name: build helm microcharts, service charts, and metacharts
-  command: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
+  shell: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
+  args:
     chdir: "{{workdir}}"
 
 - name: copy cloud.yaml to workdir
