@@ -145,14 +145,14 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: compute_label.stdout != kolla_compute=true
+  when: compute_label.stdout != "kolla_compute=true"
 
 - name: add kolla_controller label to node
   shell: kubectl label node $(hostname) kolla_controller=true
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: controller_label.stdout != kolla_controller=true
+  when: controller_label.stdout != "kolla_controller=true"
 
 - name: create add to globals.yaml
   template:
