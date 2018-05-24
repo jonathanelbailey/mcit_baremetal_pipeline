@@ -8,6 +8,7 @@
   pip:
     name: "{{item}}"
     state: present
+  become: yes
   with_items:
     - openshift
     - pyaml
