@@ -1,11 +1,28 @@
+- name: check for existing mariadb deployment
+  shell: helm status mariadb | grep 'STATUS:' | awk '{print $2}'
+  args:
+    chdir: "{{workdir}}"
+  register: mariadb_deploy
+
 - name: deploy mariadb
   shell: helm install --debug {{workdir}}/kolla-kubernetes/helm/service/mariadb --namespace kolla --name mariadb --values ./cloud.yaml
   args:
     chdir: "{{workdir}}"
+  when: mariadb_deploy.stdout == "DEPLOYED"
+  register: maria_wait
+  run_once: yes
 
 - name: wait for mariadb
   pause:
     minutes: 2
+  when: maria_wait.changed
+
+- name: check for existing nova deployment
+  shell: helm status nova-compute | grep 'STATUS:' | awk '{print $2}'
+  args:
+    chdir: "{{workdir}}"
+  register: nova_deploy
+  
 
 - name: deploy the rest of services
   shell: "{{item}}"
@@ -22,20 +39,26 @@
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
   args:
     chdir: "{{workdir}}"
+  when: nova_deploy.stdout == "DEPLOYED"
+  register: os_deploy
+  run_once: yes
 
 - name: wait for openstack to deploy
   pause:
     minutes: 2
+  when: os_deploy.changed
 
 - name: build keystone local admin
   shell: "{{workdir}}/kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext"
   args:
     chdir: "{{workdir}}"
+  when: os_deploy.changed
 
 - name: create openrc file
   shell: . ~/keystonerc_admin
   args:
     chdir: "{{workdir}}"
+  when: os_deploy.changed
 
 - name: install openstack clients
   pip:
@@ -56,3 +79,4 @@
   shell: "{{workdir}}/init-runonce"
   args:
     chdir: "{{workdir}}"
+  when: os_deploy.changed
