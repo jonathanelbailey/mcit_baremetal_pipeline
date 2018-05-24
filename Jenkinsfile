@@ -64,7 +64,7 @@ node {
             }
         }
     }
-    stage('Docker Configuration') {
+    stage('Docker Deploy') {
         withCredentials([usernamePassword(credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c', passwordVariable: 'sudo_pass', usernameVariable: 'sudo_user')]){
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
@@ -80,7 +80,7 @@ node {
             }
         }
     }
-    stage('Kubernetes Configuration') {
+    stage('Kubernetes Deploy') {
         withCredentials([usernamePassword(credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c', passwordVariable: 'sudo_pass', usernameVariable: 'sudo_user')]){
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
@@ -96,7 +96,7 @@ node {
             }
         }
     }
-    stage('Kolla Configuration') {
+    stage('Kolla Deploy') {
         withCredentials([usernamePassword(credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c', passwordVariable: 'sudo_pass', usernameVariable: 'sudo_user')]){
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
@@ -112,7 +112,7 @@ node {
             }
         }
     }
-    stage('Openstack Configuration') {
+    stage('Openstack Deploy') {
         withCredentials([usernamePassword(credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c', passwordVariable: 'sudo_pass', usernameVariable: 'sudo_user')]){
             wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
