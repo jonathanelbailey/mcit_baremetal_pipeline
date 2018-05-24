@@ -83,9 +83,6 @@
   shell: kubectl cluster-info | grep KubeDNS
   register: cluster_status
 
-- debug:
-    msg: "{{cluster_status}}"
-
 - name: apply rbac config
   shell: kubectl apply -f {{rbac_config}}
   run_once: yes
