@@ -4,6 +4,11 @@
     state: present
   become: yes
 
+- name: upgrade setuptools
+  pip:
+    name: setuptools
+    state: latest
+
 - name: install k8s_raw dependencies
   pip:
     name: "{{item}}"
