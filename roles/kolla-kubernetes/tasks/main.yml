@@ -16,6 +16,9 @@
     url: "{{helm_install}}"
     dest: "{{helm_install_path}}" 
     mode: 700
+    owner: "{{ansible_user_id}}"
+    group: "{{ansible_user_gid}}"
+  become: yes
   
 - name: run helm install script
   script: "{{root_path}}/get_helm.sh"
