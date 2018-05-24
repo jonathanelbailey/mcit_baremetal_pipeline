@@ -1,26 +1,15 @@
+- name: copy rbac_override
+  template:
+    src: rbac_override.yaml.j2
+    dest: "{{root_path}}/rbac_override.yaml"
+  run_once: yes
+  
 - name: override default rbac settings
-  shell: |
-    kubectl apply -f <\(cat <<EOF
-    apiVersion: rbac.authorization.k8s.io/v1beta1
-    kind: ClusterRoleBinding
-    metadata:
-      name: cluster-admin
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: cluster-admin
-    subjects:
-    - kind: Group
-      name: system:masters
-    - kind: Group
-      name: system:authenticated
-    - kind: Group
-      name: system:unauthenticated
-    EOF
-    \)
+  shell: kubectl apply -f {{root_path}}/rbac_override.yaml
   args:
     chdir: "{{root_path}}"
   run_once: yes
+
 
 - name: get helm install script
   get_url:

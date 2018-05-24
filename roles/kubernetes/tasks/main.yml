@@ -101,7 +101,7 @@
     replace: "{{pod_net_cidr}}"
   when: cluster_status.stdout.find("KubeDNS is running") != -1
 
-- name: apply rbac config
+- name: apply canal config
   shell: kubectl apply -f {{canal_config_path}}
   run_once: yes
   when: cluster_status.stdout.find("KubeDNS is running") != -1
