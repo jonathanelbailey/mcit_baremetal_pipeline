@@ -7,7 +7,6 @@ pod_net_cidr: 10.1.0.0/16
 service_cidr: 10.3.3.0/24
 
 rbac_config: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/rbac.yaml
-rbac_config_path: "{{ansible_env.HOME}}/rbac.yaml"
 canal_config: https://raw.githubusercontent.com/projectcalico/canal/master/k8s-install/1.7/canal.yaml
 canal_config_path: "{{ansible_env.HOME}}/canal.yaml"
 

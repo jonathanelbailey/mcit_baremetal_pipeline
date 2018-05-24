@@ -93,11 +93,8 @@
     regexp: 10.244.0.0/16
     replace: "{{pod_net_cidr}}"
 
-- name: apply canal config
-  k8s_raw:
-    state: present
-    src: "{{canal_config_path}}"
-    force: yes
+- name: apply rbac config
+  shell: kubectl apply -f {{canal_config_path}}
 
 - name: taint nodes
   command: kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
