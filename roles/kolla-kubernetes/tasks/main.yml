@@ -154,10 +154,10 @@
   run_once: yes
   when: controller_label.stdout != "kolla_controller=true"
 
-- name: create globals.yaml
+- name: create globals.yml
   template:
-    src: globals.yaml.j2
-    dest: /etc/kolla/globals.yaml
+    src: globals.yml.j2
+    dest: /etc/kolla/globals.yml
   become: yes
 
 - name: create kolla config path
