@@ -23,6 +23,9 @@
   args:
     chdir: "{{workdir}}"
 
+- name: wait for openstack to deploy
+  pause:
+    minutes: 10
 
 - name: build keystone local admin
   shell: "{{workdir}}/kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext"
