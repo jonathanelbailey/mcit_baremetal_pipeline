@@ -154,18 +154,11 @@
   run_once: yes
   when: controller_label.stdout != "kolla_controller=true"
 
-- name: create add to globals.yaml
+- name: create globals.yaml
   template:
-    src: add_to_globals.yaml.j2
-    dest: "{{ workdir }}/add_to_globals.yaml"
+    src: globals.yaml.j2
+    dest: /etc/kolla/globals.yaml
   become: yes
-
-- name: add to globals
-  shell: cat ./add-to-globals.yml | sudo tee -a /etc/kolla/globals.yml
-  args:
-    chdir: "{{workdir}}"
-  become: yes
-  run_once: yes
 
 - name: create kolla config path
   file:
@@ -180,7 +173,7 @@
   become: yes
 
 - name: create the default configuration
-  shell: ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla {{workdir}}/kolla-kubernetes/ansible/site.yml
+  shell: ansible-playbook -e ansible_python_interpreter=/usr/bin/python -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla kolla-kubernetes/ansible/site.yml
   args:
     chdir: "{{workdir}}"
   become: yes
@@ -197,7 +190,13 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: secrets_count.stdout != 200
+  when: secrets_count.stdout != 122
+
+- name: check for charts
+  shell: ls | grep ".tgz" | wc -l
+  args:
+    chdir: "{{workdir}}"
+  register: charts_count
 
 - name: create and register the kolla config maps
   shell: |
@@ -214,12 +213,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-
-- name: check for charts
-  shell: ls | grep ".tgz" | wc -l
-  args:
-    chdir: "{{workdir}}"
-  register: charts_count
+  when: charts_count.stdout != 200
 
 - name: build helm microcharts, service charts, and metacharts
   shell: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
