@@ -59,9 +59,15 @@
   register: kubelet_status
   become: yes
 
+- debug:
+    msg: "{{kubelet_status}}"
+
 - name: check to see if kubernetes is up
-  shell: kubectl cluster-info | grep KubeDNS
+  shell: kubectl cluster-info | grep -o "KubeDNS.*is running"
   register: cluster_status
+
+- debug:
+    msg: "{{cluster_status}}"
 
 - name: configure iptables bridge
   sysctl:
@@ -71,8 +77,8 @@
     state: present
     reload: yes
   with_items:
-    - net.bridge.bridge-nf-call-iptables = 1
-    - net.bridge.bridge-nf-call-ip6tables = 1
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
   become: yes
 
 - name: deploy kubernetes with kubeadm
