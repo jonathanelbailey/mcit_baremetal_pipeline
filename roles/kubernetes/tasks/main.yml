@@ -43,16 +43,9 @@
   become: yes
   when: cgroup_kube.changed or dns_kube.changed
 
-- name: check kubernetes status
-  stat:
-    path: /etc/kubernetes/admin.conf
-  become: yes
-  register: cluster_status
-
 - name: deploy kubernetes with kubeadm
-  command: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
+  shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
-  when: cluster_status.stat.exists == False
 
 - name: make kubeadm creds folder
   file:
