@@ -59,6 +59,18 @@
   register: kubelet_status
   become: yes
 
+- name: configure iptables bridge
+  sysctl:
+    name: "{{item}}"
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+  with_items:
+    - net.bridge.bridge-nf-call-iptables = 1
+    - net.bridge.bridge-nf-call-ip6tables = 1
+  become: yes
+
 - name: deploy kubernetes with kubeadm
   shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes

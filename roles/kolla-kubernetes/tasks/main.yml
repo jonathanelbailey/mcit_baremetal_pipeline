@@ -38,12 +38,18 @@
   run_once: yes
   when: helm_exists.stdout != "/usr/local/bin/helm"
 
+- name: check helm version
+  shell: helm version -s --tiller-connection-timeout 10 | awk '{print $1}'
+  args:
+    chdir: "{{workdir}}"
+  register: tiller_deployed
+
 - name: helm init
   shell: helm init
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: helm_exists.stdout != "/usr/local/bin/helm"
+  when: tiller_deployed.stdout == "Error:"
 
 - name: install epel
   yum:
