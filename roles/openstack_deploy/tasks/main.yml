@@ -8,7 +8,7 @@
   shell: helm install --debug {{workdir}}/kolla-kubernetes/helm/service/mariadb --namespace kolla --name mariadb --values ./cloud.yaml
   args:
     chdir: "{{workdir}}"
-  when: mariadb_deploy.stdout == "DEPLOYED"
+  when: mariadb_deploy.stdout != "DEPLOYED"
   register: maria_wait
   run_once: yes
 
@@ -39,7 +39,7 @@
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
   args:
     chdir: "{{workdir}}"
-  when: nova_deploy.stdout == "DEPLOYED"
+  when: nova_deploy.stdout != "DEPLOYED"
   register: os_deploy
   run_once: yes
 
