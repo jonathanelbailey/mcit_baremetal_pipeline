@@ -12,10 +12,10 @@ global:
        all:
          admin_port_external: "true"
          dns_name: "{{ mgmt_ip }}"
+         port: 5000
        public:
          all:
            port_external: "true"
-           port: 5000
      rabbitmq:
        all:
          cookie: 67
