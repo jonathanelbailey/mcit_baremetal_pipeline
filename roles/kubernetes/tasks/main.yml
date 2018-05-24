@@ -50,12 +50,14 @@
   become: yes
 
 - name: check kubernetes status
-  command: kubectl cluster-info
+  stat:
+    path: /etc/kubernetes/admin.conf
   register: cluster_status
 
 - name: deploy kubernetes with kubeadm
   command: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
+  when: cluster_status.stat.exists == False
 
 - name: make kubeadm creds folder
   file:
