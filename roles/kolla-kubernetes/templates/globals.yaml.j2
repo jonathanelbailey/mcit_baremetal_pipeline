@@ -102,7 +102,7 @@ network_interface: "{{mgmt_int}}"
 # though an IP address can exist on this interface, it will be unusable in most
 # configurations. It is recommended this interface not be configured with any IP
 # addresses for that reason.
-neutron_external_interface: "{{neutron}}"
+neutron_external_interface: "{{neutron_int}}"
 
 # Valid options are [ openvswitch, linuxbridge, vmware_nsxv, vmware_dvs, opendaylight ]
 #neutron_plugin_agent: "openvswitch"
