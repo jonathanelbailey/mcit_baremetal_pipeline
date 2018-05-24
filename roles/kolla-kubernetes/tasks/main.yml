@@ -10,6 +10,9 @@
     chdir: "{{workdir}}"
   register: rbac_exists
 
+- debug:
+    msg: "{{rbac_exists}}"
+
 - name: override default rbac settings
   shell: kubectl apply -f {{root_path}}/rbac_override.yaml
   args:
@@ -20,6 +23,9 @@
 - name: check helm
   shell: which helm
   register: helm_exists
+
+- debug:
+    msg: "{{helm_exists}}"
 
 - name: get helm install script
   get_url:
@@ -92,6 +98,9 @@
     - /etc/kolla
     - /etc/kolla-kubernetes
   register: folders_exist
+
+- debug:
+    msg: "{{folders_exist}}"
 
 - name: copy default kolla config to /etc
   shell: cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
