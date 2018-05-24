@@ -23,7 +23,6 @@
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  become: yes
 
 - name: helm init
   shell: helm init
