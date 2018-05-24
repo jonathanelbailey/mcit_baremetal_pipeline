@@ -78,7 +78,7 @@
   run_once: yes
 
 - name: copy default kolla-kubernetes config to /etc
-  shell: sudo cp -aR kolla-kubernetes/etc/kolla-kubernetes /etc
+  shell: cp -aR kolla-kubernetes/etc/kolla-kubernetes /etc
   args:
     chdir: "{{workdir}}"
   become: yes
@@ -109,11 +109,18 @@
     chdir: "{{workdir}}"
   run_once: yes
 
-- name: add globals.yaml
+- name: create add to globals.yaml
   template:
-    src: globals.yaml.j2
-    dest: "{{ globals_path }}"
+    src: add_to_globals.yaml.j2
+    dest: "{{ workdir }}/add_to_globals.yaml"
   become: yes
+
+- name: add to globals
+  shell: cat ./add-to-globals.yml | sudo tee -a /etc/kolla/globals.yml
+  args:
+    chdir: "{{workdir}}"
+  become: yes
+  run_once: yes
 
 - name: create kolla config path
   file:

@@ -17,6 +17,7 @@ enable_magnum: "no"
 enable_murano: "no"
 enable_neutron_lbaas: "no"
 enable_octavia: "no"
+enable_prometheus: "no"
 
 mgmt_ip: 10.0.0.210
 mgmt_int: enp15s1f2
