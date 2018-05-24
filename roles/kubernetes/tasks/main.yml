@@ -98,7 +98,7 @@
 - name: check clusterrolebinding
   shell: kubectl get clusterrolebinding --all-namespaces | grep canal-calico | awk '{print $1}'
   args:
-    chdir: "{{workdir}}"
+    chdir: "{{ansible_env.HOME}}"
   register: rbac_deployed
 
 - name: apply rbac config
@@ -117,7 +117,7 @@
 - name: check canal configmap
   shell: kubectl get configmap --all-namespaces | grep canal-config | awk '{print $2}'
   args:
-    chdir: "{{workdir}}"
+    chdir: "{{ansible_env.HOME}}"
   register: canal_deployed
 
 - name: update canal config
