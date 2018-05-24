@@ -18,6 +18,8 @@
       name: system:unauthenticated
     EOF
     )
+  args:
+    chdir: "{{root_path}}"
   run_once: yes
 
 - name: get helm install script
