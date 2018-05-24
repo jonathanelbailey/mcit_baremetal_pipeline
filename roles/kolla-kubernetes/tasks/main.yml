@@ -17,7 +17,6 @@
     mode: 700
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
-  become: yes
   
 - name: run helm install script
   shell: ./get_helm.sh
