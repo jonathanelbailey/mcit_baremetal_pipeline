@@ -12,7 +12,7 @@ canal_config_path: /tmp/canal.yaml
 
 kube_packages:
   - ebtables
-  - kubadm
+  - kubeadm
   - kubectl
   - kubelet
   - kubernetes-cni
