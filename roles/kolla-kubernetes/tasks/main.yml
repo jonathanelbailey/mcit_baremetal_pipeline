@@ -14,17 +14,16 @@
   get_url:
     url: "{{helm_install}}"
     dest: "{{helm_install_path}}" 
-    mode: 755
+    mode: 700
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
   become: yes
   
 - name: run helm install script
-  shell: "{{root_path}}/get_helm.sh"
+  shell: ./get_helm.sh
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  become: yes
 
 - name: helm init
   shell: helm init
