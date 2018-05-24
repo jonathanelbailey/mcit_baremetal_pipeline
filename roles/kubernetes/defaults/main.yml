@@ -18,3 +18,9 @@ kube_packages:
   - kubernetes-cni
   - git
   - gcc
+
+kube_packages_Rm:
+  - kubeadm
+  - kubectl
+  - kubelet
+  - kubernetes-cni
