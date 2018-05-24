@@ -74,13 +74,13 @@
 
 - name: make kubeadm creds folder
   file:
-    name: $HOME/.kube
+    name: /home/{{ansible_env.HOME}}/.kube
     state: directory
 
 - name: copy admin.conf to kube conf
   copy:
     src: /etc/kubernetes/admin.conf
-    dest: $HOME/.kube/config
+    dest: "{{ansible_env.HOME}}/.kube/config"
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
     remote_src: yes

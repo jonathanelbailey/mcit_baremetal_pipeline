@@ -1,6 +1,6 @@
 helm_install: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
 helm_install_path: /tmp/get_helm.sh
-root_path: /tmp
+root_path: "{{ansible_env.HOME}}"
 workdir: "{{root_path}}/kolla-bringup"
 
 globals_path: /etc/kolla/globals.yml
