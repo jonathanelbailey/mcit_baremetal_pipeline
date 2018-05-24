@@ -54,10 +54,16 @@
     enabled: yes
   become: yes
 
+- name: check that kubelet is failing
+  shell: systemctl status kubelet | grep Active
+  register: kubelet_status
+  become: yes
+
 - name: deploy kubernetes with kubeadm
   shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
   run_once: yes
+  when: kubelet_status.stdout.find("failed") != -1
 
 - name: make kubeadm creds folder
   file:
