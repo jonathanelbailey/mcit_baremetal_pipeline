@@ -4,8 +4,8 @@
     dest: "{{root_path}}/rbac_override.yaml"
   run_once: yes
 
-- name: check cluster-admin status
-  shell: kubectl get clusterrolebinding --all-namespaces | grep cluster-admin | awk '{print $1}'
+- name: check kolla services account status
+  shell: kubectl get serviceaccount -n kolla | grep default | awk '{print $1}'
   args:
     chdir: "{{workdir}}"
   register: rbac_exists
@@ -15,7 +15,7 @@
   args:
     chdir: "{{root_path}}"
   run_once: yes
-  when: rbac_exists.stdout != "cluster-admin"
+  when: rbac_exists.stdout != "default"
 
 - name: check helm
   shell: which helm
