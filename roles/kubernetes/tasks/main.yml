@@ -39,14 +39,21 @@
   service:
     name: kubelet
     state: reloaded
-    enabled: yes
   become: yes
   when: cgroup_kube.changed or dns_kube.changed
 
-- name: restart kubelet service
+- name: stop kubelet service
   service:
     name: kubelet
-    state: restarted
+    state: stopped
+  become: yes
+  when: cgroup_kube.changed or dns_kube.changed
+
+- name: start kubelet service
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
   become: yes
   when: cgroup_kube.changed or dns_kube.changed
 
