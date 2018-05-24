@@ -5,8 +5,8 @@ workdir: "{{root_path}}/kolla-bringup"
 
 globals_path: /etc/kolla/globals.yml
 enable_central_logging: "yes"
-enable_collectd: "no"
-enable_grafana: "no"
+enable_collectd: "yes"
+enable_grafana: "yes"
 enable_heat: "no"
 enable_elasticsearch: "no"
 enable_kibana: "no"
@@ -17,7 +17,7 @@ enable_magnum: "no"
 enable_murano: "no"
 enable_neutron_lbaas: "no"
 enable_octavia: "no"
-enable_prometheus: "no"
+enable_prometheus: "yes"
 
 mgmt_ip: 10.0.0.210
 mgmt_int: enp15s1f2
