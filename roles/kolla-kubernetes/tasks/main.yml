@@ -226,7 +226,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: charts_count.stdout != 200
+  when: charts_count.stdout != "200"
 
 - name: copy cloud.yaml to workdir
   template:

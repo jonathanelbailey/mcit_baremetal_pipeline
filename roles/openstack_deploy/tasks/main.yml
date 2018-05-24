@@ -1,5 +1,6 @@
 - name: deploy mariadb
-  command: helm install --debug {{workdir}}/kolla-kubernetes/helm/service/mariadb --namespace kolla --name mariadb --values ./cloud.yaml
+  shell: helm install --debug {{workdir}}/kolla-kubernetes/helm/service/mariadb --namespace kolla --name mariadb --values ./cloud.yaml
+  args:
     chdir: "{{workdir}}"
 
 - name: wait for mariadb
@@ -7,7 +8,7 @@
     minutes: 2
 
 - name: deploy the rest of services
-  command: "{{item}}"
+  shell: "{{item}}"
   with_items:
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/rabbitmq --namespace kolla --name rabbitmq --values ./cloud.yaml
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/memcached --namespace kolla --name memcached --values ./cloud.yaml
@@ -19,13 +20,19 @@
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/neutron --namespace kolla --name neutron --values ./cloud.yaml
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/nova-control --namespace kolla --name nova-control --values ./cloud.yaml
     - helm install --debug {{workdir}}/kolla-kubernetes/helm/service/nova-compute --namespace kolla --name nova-compute --values ./cloud.yaml
+  args:
+    chdir: "{{workdir}}"
+
 
 - name: build keystone local admin
-  command: "{{workdir}}/kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext"
+  shell: "{{workdir}}/kolla-kubernetes/tools/build_local_admin_keystonerc.sh ext"
+  args:
     chdir: "{{workdir}}"
 
 - name: create openrc file
-  command: . ~/keystonerc_admin
+  shell: . ~/keystonerc_admin
+  args:
+    chdir: "{{workdir}}"
 
 - name: install openstack clients
   pip:
@@ -36,7 +43,13 @@
     - python-neutronclient
     - python-cinderclient
 
-- name: create final configurations
-  command: "{{workdir}}/kolla-ansible/tools/init-runonce"
-    chdir: "{{workdir}}"
+- name: copy script
+  file:
+    src: "init-runonce"
+    dest: "{{workdir}}/init-runonce"
+    mode: 0700
 
+- name: make final configurations
+  shell: "{{workdir}}/init-runonce"
+  args:
+    chdir: "{{workdir}}"
