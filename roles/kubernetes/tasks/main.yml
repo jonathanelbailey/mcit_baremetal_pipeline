@@ -81,7 +81,6 @@
 
 - name: apply rbac config
   shell: kubectl apply -f {{rbac_config}}
-  become: yes
 
 - name: download canal config
   get_url:
@@ -93,7 +92,6 @@
     path: "{{canal_config_path}}"
     regexp: 10.244.0.0/16
     replace: "{{pod_net_cidr}}"
-  become: yes
 
 - name: apply canal config
   k8s_raw:
