@@ -1,0 +1,24 @@
+- name: check if kubelet is listening
+  shell: ss -4 state listening -p | grep kubelet
+  become: yes
+  register: kube_listening
+
+- name: remove folder
+  file:
+    state: absent
+    path: "{{item}}"
+  become: yes
+  with_items:
+    - /etc/kubernetes
+    - /var/lib/kubernetes
+
+- name: clean failed kubelet listener
+  command: kubeadm reset
+  become: yes
+  when: kube_listening.stdout.find("kubelet") != -1
+
+- name: remove packages
+  yum:
+    name: "{{kube_packages_rm}}"
+    state: absent
+  become: yes

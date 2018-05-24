@@ -53,15 +53,15 @@
     state: started
     enabled: yes
   become: yes
-  when: cgroup_kube.changed or dns_kube.changed
 
 - name: deploy kubernetes with kubeadm
   shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
+  run_once: yes
 
 - name: make kubeadm creds folder
   file:
-    name: /home/{{ansible_env.HOME}}/.kube
+    name: "{{ansible_env.HOME}}/.kube"
     state: directory
 
 - name: copy admin.conf to kube conf
