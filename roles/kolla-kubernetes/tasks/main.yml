@@ -192,11 +192,11 @@
   run_once: yes
   when: secrets_count.stdout != 122
 
-- name: check for charts
-  shell: ls | grep ".tgz" | wc -l
+- name: check for configmaps
+  shell: kollakube res status configmap tgtd | grep tgtd | awk '{print $1}'
   args:
     chdir: "{{workdir}}"
-  register: charts_count
+  register: configmaps_exist
 
 - name: create and register the kolla config maps
   shell: |
@@ -213,7 +213,13 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: charts_count.stdout != 200
+  when: configmaps.stdout != "tgtd"
+
+- name: check for charts
+  shell: ls | grep ".tgz" | wc -l
+  args:
+    chdir: "{{workdir}}"
+  register: charts_count
 
 - name: build helm microcharts, service charts, and metacharts
   shell: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
