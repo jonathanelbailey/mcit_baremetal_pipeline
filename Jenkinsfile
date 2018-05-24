@@ -83,4 +83,36 @@ node {
             }
         }
     }
+    stage('Kolla Configuration') {
+        withCredentials([usernamePassword(credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c', passwordVariable: 'sudo_pass', usernameVariable: 'sudo_user')]){
+            wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                ansiblePlaybook(
+                    playbook: "$env.WORKSPACE/configure_kolla.yml",
+                    inventory: "$env.WORKSPACE/hosts",
+                    credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c',
+                    hostKeyChecking: false,
+                    colorized: true,
+                    extraVars: [
+                        ansible_become_pass: [ value: "$sudo_pass", hidden: true ]
+                    ]
+                )
+            }
+        }
+    }
+    // stage('Openstack Configuration') {
+    //     withCredentials([usernamePassword(credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c', passwordVariable: 'sudo_pass', usernameVariable: 'sudo_user')]){
+    //         wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+    //             ansiblePlaybook(
+    //                 playbook: "$env.WORKSPACE/configure_kolla.yml",
+    //                 inventory: "$env.WORKSPACE/hosts",
+    //                 credentialsId: 'ca75d291-93c4-47f8-aa5a-3a3b0b703d9c',
+    //                 hostKeyChecking: false,
+    //                 colorized: true,
+    //                 extraVars: [
+    //                     ansible_become_pass: [ value: "$sudo_pass", hidden: true ]
+    //                 ]
+    //             )
+    //         }
+    //     }
+    // }
 }
