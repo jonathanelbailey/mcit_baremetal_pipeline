@@ -71,18 +71,18 @@
   become: yes
 
 - name: copy default kolla config to /etc
-  copy:
-    src: /usr/share/kolla-ansible/etc_examples/kolla
-    dest: /etc
-    remote_src: yes
+  shell: cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
+  args:
+    chdir: "{{workdir}}"
   become: yes
+  run_once: yes
 
 - name: copy default kolla-kubernetes config to /etc
-  copy:
-    src: "{{workdir}}/kolla-kubernetes/etc/kolla-kubernetes"
-    dest: /etc
-    remote_src: yes
+  shell: sudo cp -aR kolla-kubernetes/etc/kolla-kubernetes /etc
+  args:
+    chdir: "{{workdir}}"
   become: yes
+  run_once: yes
 
 - name: generate default passwords
   shell: kolla-kubernetes-genpwd
