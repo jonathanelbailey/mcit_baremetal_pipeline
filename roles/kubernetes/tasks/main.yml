@@ -81,6 +81,7 @@
 
 - name: apply rbac config
   shell: kubectl apply -f {{rbac_config}}
+  run_once: yes
 
 - name: download canal config
   get_url:
@@ -95,6 +96,8 @@
 
 - name: apply rbac config
   shell: kubectl apply -f {{canal_config_path}}
+  run_once: yes
 
 - name: taint nodes
   command: kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
+  run_once: yes
