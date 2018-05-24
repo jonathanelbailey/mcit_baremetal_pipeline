@@ -10,7 +10,6 @@
     chdir: "{{root_path}}"
   run_once: yes
 
-
 - name: get helm install script
   get_url:
     url: "{{helm_install}}"
@@ -21,7 +20,7 @@
   become: yes
   
 - name: run helm install script
-  shell: get_helm.sh
+  shell: "{{root_path}}/get_helm.sh"
   args:
     chdir: "{{root_path}}"
   run_once: yes
