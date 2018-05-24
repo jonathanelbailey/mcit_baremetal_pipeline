@@ -23,7 +23,7 @@
   replace:
     path: "{{kubeadm_conf}}"
     regexp: "systemd"
-    replace: "{{cgroup_info}}"
+    replace: "{{cgroup_info.stdout}}"
   register: cgroup_kube
   become: yes
 
@@ -31,7 +31,7 @@
   replace:
     path: "{{kubeadm_conf}}"
     regexp: 10.96.0.10
-    replace: "{{dns_svc_cidr.stdout}}"
+    replace: "{{dns_svc_cidr}}"
   register: dns_kube
   become: yes
 
