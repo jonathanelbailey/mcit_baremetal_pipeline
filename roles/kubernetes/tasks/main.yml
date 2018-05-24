@@ -95,10 +95,18 @@
   shell: kubectl cluster-info | grep KubeDNS
   register: cluster_status
 
+- name: check clusterrolebinding
+  shell: kubectl get clusterrolebinding --all-namespaces | grep canal-calico | awk '{print $1}'
+  args:
+    chdir: "{{workdir}}"
+  register: rbac_deployed
+
 - name: apply rbac config
   shell: kubectl apply -f {{rbac_config}}
   run_once: yes
-  when: cluster_status.stdout.find("KubeDNS is running") != -1
+  when: 
+    - cluster_status.stdout.find("KubeDNS is running") != -1
+    - rbac_deployed.stdout != "canal-calico"
 
 - name: download canal config
   get_url:
@@ -106,12 +114,20 @@
     dest: "{{canal_config_path}}"
   when: cluster_status.stdout.find("KubeDNS is running") != -1
 
+- name: check canal configmap
+  shell: kubectl get configmap --all-namespaces | grep canal-config | awk '{print $2}'
+  args:
+    chdir: "{{workdir}}"
+  register: canal_deployed
+
 - name: update canal config
   replace:
     path: "{{canal_config_path}}"
     regexp: 10.244.0.0/16
     replace: "{{pod_net_cidr}}"
-  when: cluster_status.stdout.find("KubeDNS is running") != -1
+  when: 
+    - cluster_status.stdout.find("KubeDNS is running") != -1
+    - canal_deployed.stdout != "canal-config"
 
 - name: apply canal config
   shell: kubectl apply -f {{canal_config_path}}
