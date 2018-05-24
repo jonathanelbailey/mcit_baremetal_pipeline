@@ -2,9 +2,9 @@
   yum_repository:
     name: kubernetes
     description: kubernetes repo
-    baseurl: {{kubernetes_repo}}
+    baseurl: "{{kubernetes_repo}}"
     gpgcheck: yes
-    gpgkey: {{kubernetes_gpgkey}}
+    gpgkey: "{{kubernetes_gpgkey}}"
     file: kubernetes
 
 - name: install packages
