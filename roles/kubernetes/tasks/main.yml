@@ -6,6 +6,7 @@
     gpgcheck: yes
     gpgkey: "{{kubernetes_gpgkey}}"
     file: kubernetes
+  become: yes
 
 - name: install packages
   yum:
@@ -96,8 +97,3 @@
 
 - name: taint nodes
   command: kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
-
-
-
-
-
