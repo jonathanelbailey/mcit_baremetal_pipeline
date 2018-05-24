@@ -196,7 +196,7 @@
   args:
     chdir: "{{workdir}}"
   run_once: yes
-  when: secrets_count.stdout != "122"
+  when: secrets_count.stdout != "123"
 
 - name: check for configmaps
   shell: kollakube res status configmap tgtd | grep tgtd | awk '{print $1}'
