@@ -8,6 +8,7 @@
   pip:
     name: setuptools
     state: latest
+  become: yes
 
 - name: install k8s_raw dependencies
   pip:
