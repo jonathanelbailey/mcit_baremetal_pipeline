@@ -43,6 +43,13 @@
   become: yes
   when: cgroup_kube.changed or dns_kube.changed
 
+- name: restart kubelet service
+  service:
+    name: kubelet
+    state: restarted
+  become: yes
+  when: cgroup_kube.changed or dns_kube.changed
+
 - name: deploy kubernetes with kubeadm
   shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
