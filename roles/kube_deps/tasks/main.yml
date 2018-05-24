@@ -1,3 +1,9 @@
+- name: install pyaml deps
+  yum:
+    name: gcc
+    state: present
+  become: yes
+
 - name: install k8s_raw dependencies
   pip:
     name: "{{item}}"
