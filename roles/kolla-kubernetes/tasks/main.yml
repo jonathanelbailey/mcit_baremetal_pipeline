@@ -3,12 +3,23 @@
     src: rbac_override.yaml.j2
     dest: "{{root_path}}/rbac_override.yaml"
   run_once: yes
-  
+
+- name: check cluster-admin status
+  shell: kubectl get clusterrolebinding --all-namespaces | grep cluster-admin | awk '{print $1}'
+  args:
+    chdir: "{{workdir}}"
+  register: rbac_exists
+
 - name: override default rbac settings
   shell: kubectl apply -f {{root_path}}/rbac_override.yaml
   args:
     chdir: "{{root_path}}"
   run_once: yes
+  when: rbac_exists.stdout == "cluster-admin"
+
+- name: check helm
+  shell: which helm
+  register: helm_exists
 
 - name: get helm install script
   get_url:
@@ -17,18 +28,22 @@
     mode: 0700
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
+  run_once: yes
+  when: helm_exists.stdout == "/usr/local/bin/helm"
   
 - name: run helm install script
   shell: ./get_helm.sh
   args:
     chdir: "{{root_path}}"
   run_once: yes
+  when: helm_exists.stdout == "/usr/local/bin/helm"
 
 - name: helm init
   shell: helm init
   args:
     chdir: "{{root_path}}"
   run_once: yes
+  when: helm_exists.stdout == "/usr/local/bin/helm"
 
 - name: install epel
   yum:
@@ -70,12 +85,21 @@
     - "{{workdir}}/kolla-kubernetes/"
   become: yes
 
+- name: check that folders exist
+  stat:
+    path: "{{item}}"
+  with_items:
+    - /etc/kolla
+    - /etc/kolla-kubernetes
+  register: folders_exist
+
 - name: copy default kolla config to /etc
   shell: cp -aR /usr/share/kolla-ansible/etc_examples/kolla /etc
   args:
     chdir: "{{workdir}}"
   become: yes
   run_once: yes
+  when: folders_exist[0].stat.exists == false
 
 - name: copy default kolla-kubernetes config to /etc
   shell: cp -aR kolla-kubernetes/etc/kolla-kubernetes /etc
@@ -83,6 +107,12 @@
     chdir: "{{workdir}}"
   become: yes
   run_once: yes
+  when: folders_exist[1].stat.exists == false
+
+- name: check that password are populated
+  shell: head -n 1 /etc/kolla/passwords.yml | awk '{print $1}'
+  become: yes
+  register: passwords
 
 - name: generate default passwords
   shell: kolla-kubernetes-genpwd
@@ -90,24 +120,39 @@
     chdir: "{{workdir}}"
   become: yes
   run_once: yes
+  when: passwords.stdout == "aodh_database_password:"
 
 - name: create kolla namespace
   k8s_raw:
     state: present
     name: kolla
     kind: Namespace
+  
+- name: check compute label
+  shell: kubectl get node --show-labels |grep $(hostname)| awk '{print $6}'| awk -F "," '{for(i=1;i<=NF;i++) {if($i ~ /kolla_compute/){print $i}}}'
+  args:
+    chdir: "{{workdir}}"
+  register: compute_label
+
+- name: check controller label
+  shell: kubectl get node --show-labels |grep $(hostname)| awk '{print $6}'| awk -F "," '{for(i=1;i<=NF;i++) {if($i ~ /kolla_controller/){print $i}}}'
+  args:
+    chdir: "{{workdir}}"
+  register: controller_label
 
 - name: add kolla_compute label to node
   shell: kubectl label node $(hostname) kolla_compute=true
   args:
     chdir: "{{workdir}}"
   run_once: yes
+  when: compute_label.stdout == kolla_compute=true
 
 - name: add kolla_controller label to node
   shell: kubectl label node $(hostname) kolla_controller=true
   args:
     chdir: "{{workdir}}"
   run_once: yes
+  when: controller_label.stdout == kolla_controller=true
 
 - name: create add to globals.yaml
   template:
@@ -141,11 +186,18 @@
   become: yes
   run_once: yes
 
+- name: check secrets count
+  shell: kubectl get secrets -n kolla | wc -l
+  args:
+    chdir: "{{workdir}}"
+  register: secrets_count
+
 - name: generate the kuberenetes secrets
   shell: "{{workdir}}/kolla-kubernetes/tools/secret-generator.py create"
   args:
     chdir: "{{workdir}}"
   run_once: yes
+  when: secrets_count.stdout == 200
 
 - name: create and register the kolla config maps
   shell: |
@@ -163,11 +215,18 @@
     chdir: "{{workdir}}"
   run_once: yes
 
+- name: check for charts
+  shell: ls | grep ".tgz" | wc -l
+  args:
+    chdir: "{{workdir}}"
+  register: charts_count
+
 - name: build helm microcharts, service charts, and metacharts
   shell: "{{workdir}}/kolla-kubernetes/tools/helm_build_all.sh ."
   args:
     chdir: "{{workdir}}"
   run_once: yes
+  when: charts_count.stdout == 200
 
 - name: copy cloud.yaml to workdir
   template:
