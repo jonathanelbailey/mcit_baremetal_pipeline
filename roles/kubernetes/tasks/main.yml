@@ -79,7 +79,7 @@
   shell: kubeadm init --pod-network-cidr={{pod_net_cidr}} --service-cidr={{service_cidr}}
   become: yes
   run_once: yes
-  when: (kubelet_status.stdout.find("activating") != -1) or (cluster_status.stdout.find('KubeDNS is running'))
+  when: (kubelet_status.stdout.find("activating") != -1) or (cluster_status.stdout.find('KubeDNS is running') == -1)
 
 - name: make kubeadm creds folder
   file:
