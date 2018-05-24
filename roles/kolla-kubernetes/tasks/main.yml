@@ -14,7 +14,7 @@
   get_url:
     url: "{{helm_install}}"
     dest: "{{helm_install_path}}" 
-    mode: 700
+    mode: 0700
     owner: "{{ansible_user_id}}"
     group: "{{ansible_user_gid}}"
   
