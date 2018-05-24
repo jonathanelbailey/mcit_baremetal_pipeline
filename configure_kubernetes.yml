@@ -4,3 +4,6 @@
         name: kube_deps
     - include_role:
         name: kubernetes
+    - include_role:
+        name: cockpit
+        tasks_from: cockpit-kubernetes
