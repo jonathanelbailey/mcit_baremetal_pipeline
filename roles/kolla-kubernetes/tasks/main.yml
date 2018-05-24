@@ -21,7 +21,7 @@
   become: yes
   
 - name: run helm install script
-  script: "{{root_path}}/get_helm.sh"
+  script: get_helm.sh
   args:
     chdir: "{{root_path}}"
   run_once: yes
