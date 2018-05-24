@@ -83,30 +83,33 @@
   shell: kubectl cluster-info | grep KubeDNS
   register: cluster_status
 
+- debug:
+    msg: "{{cluster_status}}"
+
 - name: apply rbac config
   shell: kubectl apply -f {{rbac_config}}
   run_once: yes
-  when: cluster_status.stdout.find("KubeDNS") != -1
+  when: cluster_status.stdout.find("KubeDNS is running") != -1
 
 - name: download canal config
   get_url:
     url: "{{canal_config}}"
     dest: "{{canal_config_path}}"
-  when: cluster_status.stdout.find("KubeDNS") != -1
+  when: cluster_status.stdout.find("KubeDNS is running") != -1
 
 - name: update canal config
   replace:
     path: "{{canal_config_path}}"
     regexp: 10.244.0.0/16
     replace: "{{pod_net_cidr}}"
-  when: cluster_status.stdout.find("KubeDNS") != -1
+  when: cluster_status.stdout.find("KubeDNS is running") != -1
 
 - name: apply rbac config
   shell: kubectl apply -f {{canal_config_path}}
   run_once: yes
-  when: cluster_status.stdout.find("KubeDNS") != -1
+  when: cluster_status.stdout.find("KubeDNS is running") != -1
 
 - name: taint nodes
   command: kubectl taint nodes --all=true  node-role.kubernetes.io/master:NoSchedule-
   run_once: yes
-  when: cluster_status.stdout.find("KubeDNS") != -1
+  when: cluster_status.stdout.find("KubeDNS is running") != -1
