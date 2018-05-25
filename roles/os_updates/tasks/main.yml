@@ -35,7 +35,7 @@
     port: 22
     search_regex: OpenSSH
     state: started
-    timeout: 600
+    timeout: 900
     delay: 300
   delegate_to: localhost
   when: reboot.changed
