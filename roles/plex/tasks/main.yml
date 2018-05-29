@@ -1,0 +1,40 @@
+- name: set ownership for plex config folder
+  file:
+    path: /plex/config
+    owner: 1000
+    group: 1000
+    recurse: yes
+  become: yes
+
+- name: set ownership for tvshows folder
+  file:
+    path: /plex/tvshows
+    owner: 1000
+    group: 1000
+    recurse: yes
+  become: yes
+
+- name: set ownership for plex movies folder
+  file:
+    path: /plex/movies
+    owner: 1000
+    group: 1000
+    recurse: yes
+  become: yes
+
+- name: plex container is present
+  docker_container:
+    name: plex_live
+    image: plexinc/pms-docker:plexpass
+    state: started
+    pull: yes
+    restart_policy: always
+    network_mode: host
+    exposed_ports:
+      - 32400:32400
+    volumes:
+      - /plex/movies:/movies
+      - /plex/tvshows:/tvshows
+      - /plex/config:/config
+  become: yes
+

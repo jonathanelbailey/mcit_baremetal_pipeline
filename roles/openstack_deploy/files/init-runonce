@@ -1,15 +1,18 @@
 #!/bin/bash
 #
 # This script is meant to be run once after running start for the first
-# time.  This script downloads a cirros image and registers it.  Then it
+# time.  This script downloads a centos image and registers it.  Then it
 # configures networking and nova quotas to allow 40 m1.small instances
 # to be created.
 
 ARCH=$(uname -m)
 IMAGE_PATH=/opt/cache/files/
-IMAGE_URL=http://download.cirros-cloud.net/0.4.0/
-IMAGE=cirros-0.4.0-${ARCH}-disk.img
-IMAGE_NAME=cirros
+OS=centos
+OS_VERSION=7
+IMAGE_NAME=CentOS-7
+IMAGE_URL=https://cloud.centos.org/${OS}/${OS_VERSION}/images/
+IMAGE=${IMAGE_NAME}-${ARCH}-GenericCloud-${IMAGE_BUILD}.qcow2
+IMAGE_BUILD=1804_02
 IMAGE_TYPE=linux
 
 # This EXT_NET_CIDR is your public network,that you want to connect to the internet via.
@@ -41,22 +44,22 @@ if [[ "${OS_USERNAME}" == "" ]]; then
 fi
 
 # Test to ensure configure script is run only once
-if openstack image list | grep -q cirros; then
+if openstack image list | grep -q centos; then
     echo "This tool should only be run once per deployment."
     exit
 fi
 
-echo Checking for locally available cirros image.
+echo Checking for locally available centos image.
 # Let's first try to see if the image is available locally
 # nodepool nodes caches them in $IMAGE_PATH
 if ! [ -f "${IMAGE_PATH}/${IMAGE}" ]; then
     IMAGE_PATH='./'
     if ! [ -f "${IMAGE_PATH}/${IMAGE}" ]; then
-        echo None found, downloading cirros image.
+        echo None found, downloading centos image.
         curl -L -o ${IMAGE_PATH}/${IMAGE} ${IMAGE_URL}/${IMAGE}
     fi
 else
-    echo Using cached cirros image from the nodepool node.
+    echo Using cached centos image from the nodepool node.
 fi
 
 EXTRA_PROPERTIES=
@@ -111,13 +114,13 @@ fi
 # Increase the quota to allow 40 m1.small instances to be created
 
 # 40 instances
-openstack quota set --instances 40 ${ADMIN_PROJECT_ID}
+openstack quota set --instances 64 ${ADMIN_PROJECT_ID}
 
 # 40 cores
-openstack quota set --cores 40 ${ADMIN_PROJECT_ID}
+openstack quota set --cores 64 ${ADMIN_PROJECT_ID}
 
 # 96GB ram
-openstack quota set --ram 96000 ${ADMIN_PROJECT_ID}
+openstack quota set --ram 128000 ${ADMIN_PROJECT_ID}
 
 # add default flavors, if they don't already exist
 if ! openstack flavor list | grep -q m1.tiny; then
